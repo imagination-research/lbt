@@ -1,0 +1,35 @@
+student_model_cfgs:
+  - model_type: huggingface
+    model_cfg:
+      path: meta-llama/Meta-Llama-3-70B-Instruct
+      name: llama-3-70b
+    sample_cfg:
+      num_return_sequences: 1
+      top_p: 0.9
+
+# can be overrided by per-model sample_cfg
+general_student_sample_cfg:
+  batch_size: 1
+  num_return_sequences: 1
+  do_sample: true
+  temperature: 0.6
+  top_p: 0.9
+  eos_token_id: [128001, 128009]
+  pad_token_id: 128001
+
+
+exam_maker_type: fixed
+exam_maker_cfg:
+  selected_indexes: # range(0, 20)
+
+exam_prompter_type: basic
+exam_prompter_cfg:
+  demo_template: "[[Question]]:\n{question}\nFirst, let's think step by step to find a complete problem-solving strategy. Then, write a python code based on the problem-solving strategy.\n\n[ROLESWITCHING assistant:][[RATIONALE]]:\n{rationale}\n\n[[Final Code]]:\n${answer}$\n"
+  exam_template: "[[Question]]:\n{question}\nFirst, let's think step by step to find a complete problem-solving strategy. Then, write a python code based on the problem-solving strategy.\n\n[ROLESWITCHING assistant:][[RATIONALE]]:\n"
+  use_multi_round_conv: true
+  stub_teaching_items:
+    - {"question": "Write a python function 'has_close_elements(numbers: List[float], threshold: float) -> bool:' to solve the following problem: Check if in given list of numbers, are any two numbers closer to each other than given threshold.", "answer": "from typing import List\ndef has_close_elements(numbers: List[float], threshold: float) -> bool:\n    for idx, elem in enumerate(numbers):\n        for idx2, elem2 in enumerate(numbers):\n            if idx != idx2:\n                distance = abs(elem - elem2)\n                if distance < threshold:\n                    return True\n    return False", "rationale": "You can use a brute-force approach to solve this problem. Let's think step by step:\n\n1. Double Loop Iteration: The code uses nested loops to compare each pair of elements in the list. The outer loop iterates through each element (elem) in the list, and the inner loop also iterates through each element (elem2) in the list. This ensures that every possible pair of elements is considered for comparison.\n\n2. Comparison and Distance Calculation: Within the nested loops, the code checks if the indices of the two elements being compared (idx and idx2) are not the same, ensuring that the code doesn't compare an element with itself. It then calculates the absolute difference (distance) between the two elements using the abs() function.\n\n3. Threshold Check: After calculating the distance between two elements, the code checks if this distance is less than the given threshold. If the distance is below the threshold, it means that the two elements are closer to each other than allowed by the threshold, and the function returns True immediately.\n\n4. Return False if No Close Elements Found: If the nested loops complete without finding any pair of elements that satisfy the condition of being closer than the threshold, the function returns False. This indicates that no such pair exists in the given list.\n"}
+
+exam_scorer_type: code
+
+teaching_plans: no demo

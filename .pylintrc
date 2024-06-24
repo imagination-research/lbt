@@ -1,0 +1,19 @@
+[MAIN]
+ignore = tests
+ignore-patterns = .*egg-info
+py-version = 3.7.2
+
+[MESSAGES CONTROL]
+disable=
+    too-many-locals,
+    too-many-arguments,
+    attribute-defined-outside-init,
+    invalid-name,
+    missing-docstring,
+    protected-access,
+    too-few-public-methods,
+    format,
+    wildcard-import,
+    bad-mcs-classmethod-argument,
+    import-error,
+

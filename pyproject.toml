@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lbt"
+version = "0.0.1"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "tqdm",
+    "pandas",
+    "datasets",
+    "openai", "tenacity", # API model
+    "fschat", "transformers", "accelerate", # open-source model (based on fastchat and huggingface Transformer)
+    "termcolor",
+    "PyYaml",
+    "ipdb",
+    "ipython",
+    "faiss-gpu", # QuesSimilarityExamMaker
+    "sentence-transformers", # QuesSimilarityExamMaker
+    "flash-attn",
+    "auto-gptq", "optimum", # Qwen-72B-Chat-Int4
+    "openai==1.16.2",
+    "gradio",
+    "tomark",
+    "Jinja2",
+    "pyext",
+    "ninja"
+]
+
+[project.optional-dependencies]
+dev = ["pre-commit", "black"]
+
+[tool.setuptools.packages.find]
+exclude = ["docs", "dist*", "scripts*", "tests*", "data*", "results*"]
+
+[tool.wheel]
+exclude = ["docs", "dist*", "scripts*", "tests*", "data*", "results*"]

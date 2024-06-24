@@ -1,0 +1,31 @@
+teaching_plans: no demo
+
+student_model_cfgs:
+  - model_type: huggingface
+    model_cfg:
+      path: meta-llama/Meta-Llama-3-8B-Instruct
+      name: llama-3-8b
+
+general_student_sample_cfg:
+  batch_size: 8
+  do_sample: false
+  num_return_sequences: 1
+  temperature: 0
+
+exam_maker_type: fixed
+
+exam_prompter_type: basic
+exam_prompter_cfg:
+  instruction: "Your task is to answer the last question below. Give step by step reasoning before you answer. When you're ready to answer, please wrap your answer and conclude using the format\n'''\n[[Final Answer]]:\n$ANSWER$\n'''\n\n\n\n"
+  demo_template: "[[Question]]:\n{question}\n\n[[Solution]]:\nLet's think step by step.\n\n{rationale}\n\n[[Final Answer]]:\n${answer}$\n"
+  exam_template: "{demo}\n\n\n[[Question]]:\n{question}\n\n[ROLESWITCHING assistant:][[Solution]]:\nLet's think step by step.\n\n"
+  use_multi_round_conv: false
+  stub_teaching_items:
+    - {"question": "Find the domain of the expression $\\frac{\\sqrt{x-2}}{\\sqrt{5-x}}$.", "rationale": "The expressions inside each square root must be non-negative. Therefore, $x-2 \\ge 0$, so $x\\ge2$, and $5 - x \\ge 0$, so $x \\le 5$.\n\nAlso, the denominator cannot be equal to zero, so $5-x>0$, which gives $x<5$.\n\nTherefore, the domain of the expression is $\\boxed{[2,5)}$.", "answer": "[2,5)"}
+    - {"question": "If $\\det \\mathbf{A} = 2$ and $\\det \\mathbf{B} = 12$, then find $\\det (\\mathbf{A} \\mathbf{B})$.", "rationale": "We have that $\\det (\\mathbf{A} \\mathbf{B}) = (\\det \\mathbf{A})(\\det \\mathbf{B}) = (2)(12) = \\boxed{24}$.", "answer": "24"}
+    - {"question": "Terrell usually lifts two 20-pound weights 12 times. If he uses two 15-pound weights instead, how many times must Terrell lift them in order to lift the same total weight?", "rationale": "If Terrell lifts two 20-pound weights 12 times, he lifts a total of $2\\cdot 12\\cdot20=480$ pounds of weight.\n\nIf he lifts two 15-pound weights instead for $n$ times, he will lift a total of $2\\cdot15\\cdot n=30n$ pounds of weight. Equating this to 480 pounds, we can solve for $n$: \\begin{align*} 30n&=480\\\\ \\Rightarrow\\qquad n&=480/30=\\boxed{16} \\end{align*}", "answer": "16"}
+    - {"question": "If the system of equations \\begin{align*} 6x-4y&=a, \\\\ 6y-9x &=b. \\end{align*} has a solution $(x, y)$ where $x$ and $y$ are both nonzero, find $\\frac{a}{b}$, assuming $b$ is nonzero.", "rationale": "If we multiply the first equation by $-\\frac{3}{2}$, we obtain $$6y-9x=-\\frac{3}{2}a$$. Since we also know that $6y-9x=b$, we have $$-\\frac{3}{2}a=b\\Rightarrow\\frac{a}{b}=\\boxed{-\\frac{2}{3}}$$.", "answer": "-\\frac{2}{3}"}
+
+exam_scorer_type: math
+exam_scorer_cfg:
+  recall_mode: false

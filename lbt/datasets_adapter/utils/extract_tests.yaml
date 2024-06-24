@@ -1,0 +1,46 @@
+gpt_model_cfgs:
+  - model_type: azure_openai
+    model_cfg:
+      model: gpt-35-turbo
+      api_version: 2024-02-15-preview
+      api_endpoint: https://infini-ai-east-us-2.openai.azure.com/
+    sample_cfg:
+      top_p: 1.0
+      temperature: 1.0
+
+function:
+  exam_template: |
+    FUNCTION SIGNATURE:
+    {function_signature}
+            
+    PSEUDOCODE TESTS
+    {examples}
+
+    LANGUAGE: {language}
+  
+  stub_items:
+    - role: "user"
+      content: |
+        FUNCTION SIGNATURE:
+        def minReverseOperations(n: int, p: int, banned: List[int], k: int) -> List[int]:
+                
+        PSEUDOCODE TESTS
+        Example 1:
+        Input: n = 4, p = 0, banned = [1,2], k = 4
+        Output: [0,-1,-1,1]
+
+        Example 2:
+        Input: n = 5, p = 0, banned = [2,4], k = 3
+        Output: [0,-1,-1,-1,-1]
+
+        Example 3:
+        Input: n = 4, p = 2, banned = [0,1,3], k = 1
+        Output: [-1,-1,0,-1]
+
+        LANGUAGE: python
+
+    - role: "assistant"
+      content: |
+        assert minReverseOperations(4, 0, [1,2], 4) == [0,-1,-1,1]
+        assert minReverseOperations(5, 0, [2,4], 3) == [0,-1,-1,-1,-1]
+        assert minReverseOperations(4, 2, [0,1,3], 1) == [-1,-1,0,-1]

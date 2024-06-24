@@ -1,0 +1,1166 @@
+From 2400ec53cd0d8243b00f375cc65d6d0f7f2971aa Mon Sep 17 00:00:00 2001
+From: Peiran Yao <peiran@ualberta.ca>
+Date: Wed, 19 Jun 2024 21:05:54 -0600
+Subject: [PATCH] lbt
+
+---
+ prompt_optimization/.DS_Store               | Bin 6148 -> 6148 bytes
+ prompt_optimization/config.py               |   4 -
+ prompt_optimization/config.py.example       |  22 +++
+ prompt_optimization/data/.DS_Store          | Bin 6148 -> 0 bytes
+ prompt_optimization/data/fallacy/dl_data.py |  32 ++++
+ prompt_optimization/data/liar/dl_data.py    |  11 +-
+ prompt_optimization/main.py                 | 101 +++++++++--
+ prompt_optimization/optimizers.py           | 191 ++++++++++++++------
+ prompt_optimization/plot.ipynb              | 152 ++++++++++++++++
+ prompt_optimization/predictors.py           |  23 +++
+ prompt_optimization/prompts/ar_sarcasm.md   |   9 -
+ prompt_optimization/prompts/ethos.md        |   9 -
+ prompt_optimization/prompts/fallacy.md      |  12 ++
+ prompt_optimization/prompts/jailbreak.md    |   9 -
+ prompt_optimization/prompts/liar.md         |   3 +
+ prompt_optimization/tasks.py                |  43 ++++-
+ prompt_optimization/utils.py                | 113 ++++++------
+ 17 files changed, 555 insertions(+), 179 deletions(-)
+ delete mode 100644 prompt_optimization/config.py
+ create mode 100644 prompt_optimization/config.py.example
+ delete mode 100644 prompt_optimization/data/.DS_Store
+ create mode 100644 prompt_optimization/data/fallacy/dl_data.py
+ create mode 100644 prompt_optimization/plot.ipynb
+ delete mode 100644 prompt_optimization/prompts/ar_sarcasm.md
+ delete mode 100644 prompt_optimization/prompts/ethos.md
+ create mode 100644 prompt_optimization/prompts/fallacy.md
+ delete mode 100644 prompt_optimization/prompts/jailbreak.md
+
+diff --git a/prompt_optimization/.DS_Store b/prompt_optimization/.DS_Store
+index 974db3a8203399e4be5794c4fa690ad28a0db12a..58ee4531490bd018f1329bb37812eea567e363f6 100644
+GIT binary patch
+delta 135
+zcmZoMXffEJ$`r@<zL$Z4frTN3A(5ekAu%`K#U&{xKM5$t;nglP>80Q?M^yO~yz&JZ
+phQZ1CxdlKy3=I4Vlbe|w*#!k;LFP>U$Rs@Z9up6YzZu9E1psV$B;No4
+
+delta 135
+zcmZoMXffEJ$`mKO?-c_B0}De6Ln1>7Lt<{ei%U{YeiBfO!=lXYWl+IUM^yO~yz&JZ
+rhQZ1CxdlKy3=ARylbe|w*%=rbHk}MVI{71$@Z@_;JTU%dAYT*!rLZPV
+
+diff --git a/prompt_optimization/config.py b/prompt_optimization/config.py
+deleted file mode 100644
+index da1bb38..0000000
+--- a/prompt_optimization/config.py
++++ /dev/null
+@@ -1,4 +0,0 @@
+-
+-OPENAI_KEY = "YOUR KEY"
+-
+-
+diff --git a/prompt_optimization/config.py.example b/prompt_optimization/config.py.example
+new file mode 100644
+index 0000000..ce5e756
+--- /dev/null
++++ b/prompt_optimization/config.py.example
+@@ -0,0 +1,22 @@
++LLM_ENDPOINTS = {
++    "mistral-7b": {
++            "model": "mistralai/Mistral-7B-Instruct-v0.3",
++            "base_url": "http://example.com/v1",
++            "api_key": "YOUR-API-TOKEN",
++    },
++    "llama3-8b": {
++            "model": "meta-llama/Meta-Llama-3-8B-Instruct",
++            "base_url": "http://example.com/v1",
++            "api_key": "YOUR-API-TOKEN",
++    },
++    "llama3-70b": {
++            "model": "meta-llama/Meta-Llama-3-70B-Instruct",
++            "base_url": "http://example.com/v1",
++            "api_key": "YOUR-API-TOKEN",
++    },
++    "gpt35": {
++            "model": "gpt-3.5-turbo",
++            "base_url": "https://api.openai.com/v1/",
++            "api_key": "YOUR-API-TOKEN",
++    },
++}
+diff --git a/prompt_optimization/data/.DS_Store b/prompt_optimization/data/.DS_Store
+deleted file mode 100644
+index d261e2b2ac790266a08c8e683df16684d6d609c4..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 6148
+zcmeHKOG*Pl5UtV?0)l4gvagUEjA1-M7On)15hKjd!Oy<8UPsU1!j(&};Sqe*RfcIZ
+z;7%k~LHDb!PuI+Y>7F7Yo<1xlL}MZvVF<D)10v=@*Nz2?lk*;T?e%1K8N1cMHh<G3
+z&%Q@jbWcl)R6c+8c2;`3*fjGt&S6DfdU`#5IsP88_#tAo>@ie*Ae|~|>4q-owqWnz
+z{ju*WYtysUUgvhPUwPAC)IF54F3x~6;0!ne|C9mT*&?HTMW3AkXTTX)Ga%<fz!0nr
+zlVUzPFy$5iSizhHy7Ur~6AWv^qzDg$H5I6-Y%K<BI_$yXYQv<c>BQE2uvPwQUN~3B
+z{vn4G*NQ$n1I|Fnz^*RGa{r&;lNoIC%M@QZ1J1yfF~C(bYo>T9yIVJ2Pwv`)agHG(
+qaY+;i^x`J~3pq!QvQzy*bi~z$Nl|tYdrk-Xk3c5GCuiUn82ALhR7JV~
+
+diff --git a/prompt_optimization/data/fallacy/dl_data.py b/prompt_optimization/data/fallacy/dl_data.py
+new file mode 100644
+index 0000000..a23f05f
+--- /dev/null
++++ b/prompt_optimization/data/fallacy/dl_data.py
+@@ -0,0 +1,32 @@
++
++
++import json
++from datasets import load_dataset
++
++# https://huggingface.co/tasksource/logical-fallacy
++dataset = load_dataset("tasksource/logical-fallacy")
++
++def convert_row(row):
++    #if row['config'] != 'edu':
++    #    return None
++    ex = {
++        'label': 1 if 'faulty generalization' in row['logical_fallacies'] else 0,
++        'text': row['source_article'][:700]
++    }
++    return json.dumps(ex)
++
++with open('train-full.jsonl', 'w') as f:
++    for row in dataset['train']:
++        out = convert_row(row)
++        if out is not None:
++            f.write(out + '\n')
++
++with open('test-full.jsonl', 'w') as f:
++    for row in dataset['test']:
++        out = convert_row(row)
++        if out is not None:
++            f.write(out + '\n')
++    for row in dataset['dev']:
++        out = convert_row(row)
++        if out is not None:
++            f.write(out + '\n')
+\ No newline at end of file
+diff --git a/prompt_optimization/data/liar/dl_data.py b/prompt_optimization/data/liar/dl_data.py
+index b9cb33b..f0d8ea0 100644
+--- a/prompt_optimization/data/liar/dl_data.py
++++ b/prompt_optimization/data/liar/dl_data.py
+@@ -10,17 +10,10 @@ from datasets import load_dataset
+ # https://huggingface.co/datasets/liar
+ dataset = load_dataset("liar")
+ 
+-train = {}
+-for row in dataset['test']:
++for row in dataset['train']:
+     if row['label'] in {0, 3}: # true, barely true
+         ex = {
+             'label': 1 if row['label'] == 0 else 0,
+             'text': f'Statement: {row["statement"]}\nJob title: {row["job_title"]}\nState: {row["state_info"]}\nParty: {row["party_affiliation"]}\nContext: {row["context"]}'
+         }
+-        print(json.dumps(ex))
+-
+-# with open('train.json', 'w') as f:
+-    
+-
+-# print(dataset)
+-quit()
+\ No newline at end of file
++        print(json.dumps(ex))
+\ No newline at end of file
+diff --git a/prompt_optimization/main.py b/prompt_optimization/main.py
+index a6d1aa7..ab475c5 100644
+--- a/prompt_optimization/main.py
++++ b/prompt_optimization/main.py
+@@ -1,3 +1,4 @@
++import random
+ import requests
+ import os
+ import evaluators
+@@ -10,21 +11,20 @@ import scorers
+ import tasks
+ import predictors
+ import optimizers
++import utils
+ 
+ 
+ def get_task_class(task_name):
+-    if task_name == 'ethos':
+-        return tasks.EthosBinaryTask
+-    elif task_name == 'jailbreak':
+-        return tasks.JailbreakBinaryTask
+-    elif task_name == 'liar':
+-        return tasks.DefaultHFBinaryTask
+-    elif task_name == 'ar_sarcasm':
++    if task_name in {'liar', 'fallacy'}:
+         return tasks.DefaultHFBinaryTask
+     else:
+         raise Exception(f'Unsupported task: {task_name}')
+ 
+ 
++def get_predictor_class(task_name):
++    return predictors.BinaryPredictor
++
++
+ def get_evaluator(evaluator):
+     if evaluator == 'bf':
+         return evaluators.BruteForceEvaluator
+@@ -47,21 +47,21 @@ def get_scorer(scorer):
+     else:
+         raise Exception(f'Unsupported scorer: {scorer}')
+ 
+-
+ def get_args():
+     parser = argparse.ArgumentParser()
+-    parser.add_argument('--task', default='ethos')
+-    parser.add_argument('--data_dir', default='data/ethos')
+-    parser.add_argument('--prompts', default='prompts/ethos.md')
++    parser.add_argument('--task', default='liar')
++    parser.add_argument('--data_dir', default='data/liar')
++    parser.add_argument('--prompts', default='prompts/liar.md')
+     # parser.add_argument('--config', default='default.json')
+     parser.add_argument('--out', default='test_out.txt')
+     parser.add_argument('--max_threads', default=32, type=int)
++    #parser.add_argument('--max_threads', default=1, type=int)
+     parser.add_argument('--temperature', default=0.0, type=float)
+ 
+     parser.add_argument('--optimizer', default='nl-gradient')
+-    parser.add_argument('--rounds', default=6, type=int)
++    parser.add_argument('--rounds', default=5, type=int)
+     parser.add_argument('--beam_size', default=4, type=int)
+-    parser.add_argument('--n_test_exs', default=400, type=int)
++    parser.add_argument('--n_test_exs', default=3000, type=int)
+ 
+     parser.add_argument('--minibatch_size', default=64, type=int)
+     parser.add_argument('--n_gradients', default=4, type=int)
+@@ -83,9 +83,24 @@ def get_args():
+     parser.add_argument('--knn_k', default=2, type=int)
+     parser.add_argument('--knn_t', default=0.993, type=float)
+     parser.add_argument('--reject_on_errors', action='store_true') 
++
++    parser.add_argument('--n_icl', default=8, type=int)
++    model_choices = config.LLM_ENDPOINTS.keys()
++    parser.add_argument('--teacher_model', default='llama3-70b', choices=model_choices)
++    parser.add_argument('--student_models', default='llama3-8b', help=f'comma separated list of models, choices: {model_choices}')
++    parser.add_argument('--gradient_mix', default=1, type=int) # how many reflections should be combined to generate new examples
++    parser.add_argument('--init_method', default='gen', choices=['gen', 'train'])
+     
+     args = parser.parse_args()
+ 
++    args.data_dir = f'data/{args.task}'
++    args.prompts = f'prompts/{args.task}.md'
++
++    for model in args.student_models.split(','):
++        assert model in model_choices
++    assert len(args.student_models.split(',')) > 0
++    assert args.gradient_mix > 0 and args.gradient_mix <= args.n_gradients
++
+     return args
+ 
+ 
+@@ -99,16 +114,19 @@ if __name__ == '__main__':
+     task = get_task_class(args.task)(args.data_dir, args.max_threads)
+     scorer = get_scorer(args.scorer)()
+     evaluator = get_evaluator(args.evaluator)(config)
++    predictor_cls = get_predictor_class(args.task)
+     bf_eval = get_evaluator('bf')(config)
+-    gpt4 = predictors.BinaryPredictor(config)
++    teacher_evaluator = predictor_cls(config, config['teacher_model'])
++    student_evaluators = [predictor_cls(config, model) for model in config['student_models'].split(',')]
+ 
+     optimizer = optimizers.ProTeGi(
+         config, evaluator, scorer, args.max_threads, bf_eval)
+ 
+     train_exs = task.get_train_examples()
+-    test_exs = task.get_test_examples()
++    test_exs = task.get_test_examples(full=True)
+ 
+     if os.path.exists(args.out):
++        print("Output file already exists. Deleting")
+         os.remove(args.out)
+ 
+     print(config)
+@@ -117,17 +135,54 @@ if __name__ == '__main__':
+         outf.write(json.dumps(config) + '\n')
+ 
+     candidates = [open(fp.strip()).read() for fp in args.prompts.split(',')]
++    template = [open(fp.strip()).read() for fp in args.prompts.split(',')][0]
++
++    # generate initial ICL examples
++    for i, candidate in enumerate(candidates):
++        # get task prompt
++        sections = utils.parse_sectioned_prompt(candidate)
++        task_section = sections['task'].strip()
++        print("Current task:", task_section)
++        print("Generating initial examples")
++        if args.init_method == 'gen':
++            initial_examples = optimizer.generate_initial_examples(task_section)[0]
++        elif args.init_method == 'train':
++            # sample initial examples
++            rng = random.Random()
++            print("sampling initial examples")
++            pos_examples = [ex for ex in train_exs if ex['label']]
++            neg_examples = [ex for ex in train_exs if not ex['label']]
++            print(len(pos_examples), len(neg_examples))
++            initial_examples = []
++            initial_examples += rng.sample(pos_examples, args.n_icl // 2)
++            initial_examples += rng.sample(neg_examples, args.n_icl // 2)
++            rng.shuffle(initial_examples)
++
++            # format initial examples
++            icl_section = ""
++            for j, ex in enumerate(initial_examples):
++                icl_section += f"### Example {j+1}\n"
++                icl_section += f"**Text:** {ex['text'].strip()}\n"
++                icl_section += f"**Label:** {'Yes' if ex['label'] else 'No'}\n\n"
++            initial_examples = icl_section
++        print("initial examples")
++        print(initial_examples)
++        new_candidate_prompt = candidate.replace("{{ icl_examples }}", initial_examples)
++        print("new candidate prompt")
++        print(new_candidate_prompt)
++        candidates[i] = new_candidate_prompt
+ 
+     for round in tqdm(range(config['rounds'] + 1)):
+         print("STARTING ROUND ", round)
+         start = time.time()
+ 
+         # expand candidates
++        gradients = []
+         if round > 0:
+-            candidates = optimizer.expand_candidates(candidates, task, gpt4, train_exs)
++            candidates, gradients = optimizer.expand_candidates(candidates, task, student_evaluators, train_exs, template=template, return_gradients=True)
+ 
+         # score candidates
+-        scores = optimizer.score_candidates(candidates, task, gpt4, train_exs)
++        scores = optimizer.score_candidates(candidates, task, teacher_evaluator, train_exs)
+         [scores, candidates] = list(zip(*sorted(list(zip(scores, candidates)), reverse=True)))
+ 
+         # select candidates
+@@ -138,13 +193,19 @@ if __name__ == '__main__':
+         with open(args.out, 'a') as outf:
+             outf.write(f"======== ROUND {round}\n")
+             outf.write(f'{time.time() - start}\n')
+-            outf.write(f'{candidates}\n')
++            outf.write("Candidates:\n")
++            outf.write(f'{json.dumps(candidates, indent=2)}\n')
++            outf.write("Gradients:\n")
++            outf.write(f'{json.dumps(gradients, indent=2)}\n')
+             outf.write(f'{scores}\n')
+         metrics = []
+-        for candidate, score in zip(candidates, scores):
+-            f1, texts, labels, preds = task.evaluate(gpt4, candidate, test_exs, n=args.n_test_exs)
++
++        # only evaluate the best one
++        for candidate, score in zip(candidates[:1], scores[:1]):
++            f1, texts, labels, preds = task.evaluate(teacher_evaluator, candidate, test_exs, n=args.n_test_exs)
+             metrics.append(f1)
+         with open(args.out, 'a') as outf:  
++            outf.write("Eavl Metrics:\n")
+             outf.write(f'{metrics}\n')
+ 
+     print("DONE!")
+diff --git a/prompt_optimization/optimizers.py b/prompt_optimization/optimizers.py
+index 2adf54a..212b4cb 100644
+--- a/prompt_optimization/optimizers.py
++++ b/prompt_optimization/optimizers.py
+@@ -1,17 +1,21 @@
+ import numpy as np
++import re
+ from tqdm import tqdm
+ import random
++import itertools
+ from abc import ABC, abstractmethod
+ import utils
+ 
+ class PromptOptimizer(ABC):
+-    def __init__(self, args, evaluator_fn, scorer, max_threads=1, bf_eval=None):
++    def __init__(self, args, evaluator_fn, scorer, max_threads=1, bf_eval=None, teacher_model=None):
+         self.opt = args
+         self.evaluator_fn = evaluator_fn
+         self.scorer = scorer
+         self.max_threads = max_threads
+         self.bf_eval = bf_eval
+ 
++        self.teacher_model = args['teacher_model'] if teacher_model is None else teacher_model
++
+     @abstractmethod
+     def expand_candidates(self, prompts, task, gpt4, train_exs):
+         pass
+@@ -25,6 +29,9 @@ class ProTeGi(PromptOptimizer):
+         for i, (l, p) in enumerate(zip(labels, preds)):
+             if l != p:
+                 error_idxs.append(i)
++        print()
++        print(f"Found {len(error_idxs)} errors")
++        print()
+ 
+         sample_idxs = random.sample(error_idxs, min(len(error_idxs), n))
+ 
+@@ -35,11 +42,15 @@ class ProTeGi(PromptOptimizer):
+         num_errors = 0
+         error_idx = 0
+         for i, (t, l, p) in enumerate(zip(sample_texts, sample_labels, sample_preds)):
+-            error_string += f'## Example {error_idx+1}\n'
++            error_string += f'## Failure Case {error_idx+1}\n'
+             error_string += f'Text: \"{t.strip()}\"\nLabel: {task.stringify_prediction(l)}\nPrediction: {task.stringify_prediction(p)}\n\n'
+             error_idx += 1
+         return error_string.strip()
+ 
++    def parse_tagged_text_for_icl(self, text, start_tag, end_tag):
++        """ Parse text that is tagged with start and end tags."""
++        return [text.split(start_tag)[-1].split(end_tag)[0].strip()]
++
+     def parse_tagged_text(self, text, start_tag, end_tag):
+         """ Parse text that is tagged with start and end tags."""
+         texts = []
+@@ -55,134 +66,204 @@ class ProTeGi(PromptOptimizer):
+             text = text[end_index+len(end_tag):]
+         return texts
+ 
+-    def _get_gradients(self, prompt, error_string, num_feedbacks=5, n=1):
++    def generate_initial_examples(self, task_prompt, n=1):
++        transformation_prompt = f"""
++        I'm trying to write {self.opt['n_icl']} in-context learning examples for a few-shot classifier.
++        The classifier will answer this question:
++        "{task_prompt}"
++
++        Based on the above information, I need a list of {self.opt['n_icl']} positive and negative learning examples.
++        Start and end the list of examples with <START> and <END>.
++
++        The list of {self.opt['n_icl']} positive and negative learning examples are:
++        """
++        transformation_prompt = '\n'.join([line.lstrip() for line in transformation_prompt.split('\n')])
++        res = utils.chatgpt(self.teacher_model, transformation_prompt, n=n)
++        new_prompts = []
++        for r in res:   
++            new_prompts += self.parse_tagged_text_for_icl(r, "<START>", "<END>")
++        return new_prompts
++
++    def _get_gradients(self, task_prompt, icl_examples, error_string, num_feedbacks=5, n=1):
+         """ Get "gradients" for a prompt based on the error string."""
+         gradient_prompt = f"""
+-        I'm trying to write a zero-shot classifier prompt.
++        I'm trying to write {self.opt['n_icl']} in-context learning examples for a few-shot classifier.
++        The classifier will answer this question:
++        "{task_prompt}"
+     
+-        My current prompt is:
+-        "{prompt}"
++        My current {self.opt['n_icl']} in-context learning examples are:
++        "{icl_examples}"
+ 
+-        But this prompt gets the following examples wrong:
++        But with these examples, the classifier got the following cases wrong:
+         {error_string}
+ 
+-        give {num_feedbacks} reasons why the prompt could have gotten these examples wrong.
++        Give {num_feedbacks} reasons why these examples could have gotten these cases wrong.
+         Wrap each reason with <START> and <END>
+         """
+         gradient_prompt = '\n'.join([line.lstrip() for line in gradient_prompt.split('\n')])
+-        res = utils.chatgpt(gradient_prompt, n=n)
++        res = utils.chatgpt(self.teacher_model, gradient_prompt, n=n)
+         feedbacks = []
+-        new_prompts = []
+         for r in res:    
+             feedbacks += self.parse_tagged_text(r, "<START>", "<END>")
++        # filter out short gradients, something like "... and ..."
++        feedbacks = [x for x in feedbacks if len(x.split()) > 5]
+         return feedbacks
+ 
+-    def apply_gradient(self, prompt, error_str, feedback_str, steps_per_gradient, n=1):
++    def apply_gradient(self, task_prompt, icl_examples, error_str, feedback_str, steps_per_gradient, n=1):
+         """ Incorporate feedback gradient into a prompt."""
+         transformation_prompt = f"""
+-        I'm trying to write a zero-shot classifier.
+-        
+-        My current prompt is:
+-        "{prompt}"
++        I'm trying to write {self.opt['n_icl']} in-context learning examples for a few-shot classifier.
++        The classifier will answer this question:
++        "{task_prompt}"
++    
++        My current {self.opt['n_icl']} in-context learning examples are:
++        "{icl_examples}"
+ 
+-        But it gets the following examples wrong:
++        But these examples get the following cases wrong:
+         {error_str}
+ 
+-        Based on these examples the problem with this prompt is that {feedback_str}
++        Based on these failure cases, the problem with the current in-context examples is that {feedback_str}
+ 
+-        Based on the above information, I wrote {steps_per_gradient} different improved prompts.
+-        Each prompt is wrapped with <START> and <END>.
++        Based on the above information, I need a new list of {self.opt['n_icl']} improved positive and negative learning examples.
++        Start and end the list of new examples with <START> and <END>.
+ 
+-        The {steps_per_gradient} new prompts are:
++        The list of {self.opt['n_icl']} new positive and negative learning examples are:
+         """
+         transformation_prompt = '\n'.join([line.lstrip() for line in transformation_prompt.split('\n')])
+-        res = utils.chatgpt(transformation_prompt, n=n)
++        res = utils.chatgpt(self.teacher_model, transformation_prompt, n=n)
+         new_prompts = []
+         for r in res:   
+-            new_prompts += self.parse_tagged_text(r, "<START>", "<END>")
++            new_prompts += self.parse_tagged_text_for_icl(r, "<START>", "<END>")
+         return new_prompts
+ 
+     def generate_synonyms(self, prompt_section, n=3):
+         """ Generate synonyms for a prompt section."""
+         rewriter_prompt = f"Generate a variation of the following instruction while keeping the semantic meaning.\n\nInput: {prompt_section}\n\nOutput:"
+-        new_instructions = utils.chatgpt(rewriter_prompt, n=n)
++        new_instructions = utils.chatgpt(self.teacher_model, rewriter_prompt, n=n)
+         new_instructions = [x for x in new_instructions if x]
+         return new_instructions
+ 
+-    def get_gradients(self, prompt, task_section, task, gpt4, texts, labels, preds):
++    def get_gradients(self, task_prompt, examples_section, task, texts, labels, preds):
+         """ Get "gradients" for a prompt based on sampled error strings."""
+         prompt_feedbacks = []
+         for _ in tqdm(range(self.opt['n_gradients']), total=self.opt['n_gradients'], desc='gradients..'):
+             error_string = self._sample_error_str(
+                 texts, labels, preds, task, n=self.opt['errors_per_gradient'])
+             gradients = self._get_gradients(
+-                task_section, error_string, self.opt['gradients_per_error'], n=1)
++                task_prompt, examples_section, error_string, self.opt['gradients_per_error'], n=1)
+             prompt_feedbacks += [(t, error_string) for t in gradients]
+         return prompt_feedbacks
+ 
+-    def expand_candidates(self, prompts, task, gpt4, train_exs):
++    def expand_candidates(self, prompts, task, evaluators, train_exs, ensemble_size=1, template=None, return_gradients=False):
+         """ Expand a list of prompts by generating gradient-based successors and 
+             synonyms for each section.
+         """
+         minibatch = random.sample(train_exs, k=self.opt['minibatch_size'])
+ 
+         new_prompts = []
++
++        gradients_for_prompts = []
++
+         for prompt in tqdm(prompts, desc=f'expanding {len(prompts)} prompts'):
+             sections = utils.parse_sectioned_prompt(prompt)
+-            task_section = sections['task'].strip()
++            task_prompt = sections['task'].strip()
++            examples_section = sections['examples'].strip()
+ 
+             # evaluate prompt on minibatch
+-            _, texts, labels, preds = task.evaluate(gpt4, prompt, minibatch)
++            # use multiple evaluators
++            texts, labels, preds = [], [], []
++            for evaluator in evaluators:
++                _, sub_texts, sub_labels, sub_preds = task.evaluate(evaluator, prompt, minibatch)
++                texts += sub_texts
++                labels += sub_labels
++                preds += sub_preds
+ 
+             # get gradients
+-            new_task_sections = []
++            new_examples_sections = []
+             if self.opt['n_gradients'] > 0:
+-                gradients = self.get_gradients(prompt, task_section, task, gpt4, texts, labels, preds)
+-                new_task_sections = []
++                gradients = self.get_gradients(task_prompt, examples_section, task, texts, labels, preds)
++                gradients_for_prompts.append((prompt, gradients))
++
++                mix_size = min(self.opt['gradient_mix'], len(gradients))
++                if mix_size > 1:
++                    gradient_combinations = list(itertools.combinations(gradients, mix_size))
++                    repeats, remains = divmod(len(gradients), len(gradient_combinations))
++                    mixed_combis = []
++                    for _ in range(repeats):
++                        for combi in gradient_combinations:
++                            combi = list(combi)
++                            random.shuffle(combi)
++                            mixed_combis.append(combi)
++                    for _ in range(remains):
++                        combi = random.choice(gradient_combinations)
++                        combi = list(combi)
++                        random.shuffle(combi)
++                        mixed_combis.append(combi)
++                    assert len(gradients) == len(mixed_combis)
++
++                    mixed_gradients = []
++                    for combi in mixed_combis:
++                        mixed_feedback = "; ".join(x[0] for x in combi)
++                        mixed_error_string = "".join(x[1] for x in combi)
++
++                        failures = re.split(r"## Failure Case [0-9]+", mixed_error_string)
++                        failures = [x.strip() for x in failures if x.strip()]
++
++                        # after mixing, we might have more than the original number of failures
++                        if len(failures) > self.opt['errors_per_gradient']:
++                            failures = random.sample(failures, self.opt['errors_per_gradient'])
++
++                        mixed_error_string = ""
++                        for i, failure in enumerate(failures):
++                            mixed_error_string += f"## Failure Case {i+1}\n{failure}\n\n"
++
++                        mixed_gradients.append((mixed_feedback, mixed_error_string))
++                    gradients = mixed_gradients # we weren't doing this before so it was useless....
++
++                if ensemble_size > 1:
++                    gradients = random.sample(gradients, len(gradients) // ensemble_size)
++
++                new_examples_sections = []
+                 for feedback, error_string in tqdm(gradients, desc='applying gradients'):
+                     tmp = self.apply_gradient(
+-                        task_section, error_string, feedback, self.opt['steps_per_gradient'])
+-                    new_task_sections += tmp
++                        task_prompt, examples_section, error_string, feedback, self.opt['steps_per_gradient'])
++                    new_examples_sections += tmp
+ 
+-            # generate synonyms
+-            mc_sampled_task_sections = []
++            # skip generate synonyms
++            mc_sampled_examples_sections = []
++            """
+             if self.opt['mc_samples_per_step'] > 0:
+-                for sect in tqdm(new_task_sections + [task_section], desc='mc samples'):
++                for sect in tqdm(new_examples_sections + [examples_section], desc='mc samples'):
+                     mc_sects = self.generate_synonyms(
+                         sect, n=self.opt['mc_samples_per_step'])
+-                    mc_sampled_task_sections += mc_sects
++                    mc_sampled_examples_sections += mc_sects
++            """
+ 
+             # combine
+-            new_sections = new_task_sections + mc_sampled_task_sections
++            new_sections = new_examples_sections + mc_sampled_examples_sections
+             new_sections = list(set(new_sections)) # dedup
++            #print("After dedupe I have ", len(new_sections), " new sections")
+             tmp_new_prompts = [
+-                prompt.replace(task_section, tmp) 
++                template.replace("{{ icl_examples }}", tmp)
+                 for tmp in new_sections
+             ]
++            #print("That makes", len(set(tmp_new_prompts)), "new prompts")
++            #print(new_sections)
++            #print(tmp_new_prompts)
+             
+             # filter a little
+             if len(new_sections) > self.opt['max_expansion_factor']:
+-                if self.opt['reject_on_errors']:
+-                    error_exs = []
+-                    for i, (t, l, p) in enumerate(zip(texts, labels, preds)):
+-                        if l != p:
+-                            error_exs.append({'text': t, 'label': l})
+-                    error_exs = random.sample(error_exs, min(len(error_exs), 16))
+-
+-                    # speed up a little
+-                    tmp_new_prompts = random.sample(tmp_new_prompts, min(len(tmp_new_prompts), self.opt['max_expansion_factor'] * 2))
+-
+-                    error_scores = self.bf_eval(tmp_new_prompts, error_exs, task, gpt4, self.scorer, max_threads=self.max_threads)
+-                    tmp_new_prompts = [tmp_new_prompts[i] for i in np.argsort(error_scores)[-self.opt['max_expansion_factor']:]]
+-                else:
+-                    tmp_new_prompts = random.sample(tmp_new_prompts, 
+-                        k=self.opt['max_expansion_factor'])
++                tmp_new_prompts = random.sample(tmp_new_prompts, 
++                    k=self.opt['max_expansion_factor'])
+ 
+             new_prompts += tmp_new_prompts
+ 
+-        new_prompts += prompts # add originals
++        if ensemble_size == 1:
++            new_prompts += prompts # add originals
+         new_prompts = list(set(new_prompts)) # dedup
+ 
++        if return_gradients:
++            return new_prompts, gradients_for_prompts
+         return new_prompts
+ 
+     def score_candidates(self, prompts, task, gpt4, train_exs):
+diff --git a/prompt_optimization/plot.ipynb b/prompt_optimization/plot.ipynb
+new file mode 100644
+index 0000000..7da096e
+--- /dev/null
++++ b/prompt_optimization/plot.ipynb
+@@ -0,0 +1,152 @@
++{
++ "cells": [
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "import re\n",
++    "from ast import literal_eval\n",
++    "from statistics import mean, median\n",
++    "import os\n",
++    "import matplotlib.pyplot as plt\n",
++    "from scipy.stats import sem"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "# Parse output file\n",
++    "\n",
++    "def parse_output(filename):\n",
++    "    with open(filename) as f:\n",
++    "        lines = f.readlines()\n",
++    "\n",
++    "    results = []\n",
++    "    round = 0\n",
++    "    skipping = False\n",
++    "    for line in lines:\n",
++    "        try:\n",
++    "            obj = literal_eval(line)\n",
++    "            if type(obj) == list and len(obj) > 0 and type(obj[0]) == float:\n",
++    "                results.append(obj)\n",
++    "        except:\n",
++    "            continue\n",
++    "    return results"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "numbers = []\n",
++    "csv = ''\n",
++    "for task in ['liar']:\n",
++    "    print()\n",
++    "    print(f\"Task: {task}\")\n",
++    "    for method in ['nostudent', 'singlestudent', 'multistudent']:\n",
++    "        repeat_results = []\n",
++    "        for repeat in range(1,31):\n",
++    "            try:\n",
++    "                results = parse_output(f'outputs/{method}-{task}-{repeat}')\n",
++    "            except FileNotFoundError:\n",
++    "                print(f\"File not found: {method}-{task}-{repeat}\")\n",
++    "                continue\n",
++    "            best_of_each = [[x[0]] for x in results]\n",
++    "            repeat_results.append(best_of_each)\n",
++    "\n",
++    "            if len(results) != 6:\n",
++    "                print(f\"Warning: {method} repeat {repeat} only has {len(results)} rounds\")\n",
++    "        if len(repeat_results) == 0:\n",
++    "            continue\n",
++    "        method_result = []\n",
++    "        sems = []\n",
++    "        for i in range(len(repeat_results[0])):\n",
++    "            data_for_timestep = [x[i] for x in repeat_results if len(x) > i]\n",
++    "            # flatten data\n",
++    "            data_for_timestep = [item for sublist in data_for_timestep for item in sublist]\n",
++    "            data_for_timestep = sorted(data_for_timestep, reverse=True)\n",
++    "            method_result.append(data_for_timestep)\n",
++    "            sems.append(sem(data_for_timestep, ddof=1))\n",
++    "        print(f\"{method}:\")\n",
++    "        values = [f\"{100*mean(x):.1f}±{100*y:.1f}\" for x,y in zip(method_result, sems)]\n",
++    "        print(values)\n",
++    "        csv += f\"{task},{method},\" + ','.join(values) + '\\n'\n",
++    "        numbers.append((task, method, method_result, sems))"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "print(csv)"
++   ]
++  },
++  {
++   "cell_type": "code",
++   "execution_count": null,
++   "metadata": {},
++   "outputs": [],
++   "source": [
++    "# Plot liar, fallacy, and corr2cause\n",
++    "fig, axes = plt.subplots(1, 2, figsize=(10, 4))\n",
++    "\n",
++    "for i, task in enumerate(['liar', 'fallacy']):\n",
++    "    titles = {'liar': 'Liar', 'fallacy': 'Fallacy'}\n",
++    "\n",
++    "    # Plot liar\n",
++    "    axes[i].set_title(titles[task])\n",
++    "    axes[i].set_xlabel(\"Iteration\")\n",
++    "    #axes[i].set_ylabel(\"$F_1$\")\n",
++    "    task_numbers = [x for x in numbers if x[0] == task]\n",
++    "    first_round = [x[2][0] for x in task_numbers]\n",
++    "    for task, method, result, err in task_numbers:\n",
++    "        axes[i].errorbar(range(len(result)), [mean(x) for x in result], yerr=err, label=method, marker='s')\n",
++    "    \n",
++    "    # draw a horizontal line at the mean of the first round\n",
++    "    if task == 'liar':\n",
++    "        axes[i].axhline(y=0.63, color='gray', linestyle='--')\n",
++    "    elif task == 'fallacy':\n",
++    "        axes[i].axhline(y=0.75, color='gray', linestyle='--')\n",
++    "\n",
++    "    axes[i].legend()\n",
++    "\n",
++    "# set a common y-axis label F_1\n",
++    "fig.text(0., 0.5, '$F_1$', va='center', rotation='vertical')\n",
++    "\n",
++    "plt.tight_layout()\n",
++    "#plt.show()\n",
++    "plt.savefig('results.pdf', bbox_inches='tight')"
++   ]
++  }
++ ],
++ "metadata": {
++  "kernelspec": {
++   "display_name": "vllm",
++   "language": "python",
++   "name": "python3"
++  },
++  "language_info": {
++   "codemirror_mode": {
++    "name": "ipython",
++    "version": 3
++   },
++   "file_extension": ".py",
++   "mimetype": "text/x-python",
++   "name": "python",
++   "nbconvert_exporter": "python",
++   "pygments_lexer": "ipython3",
++   "version": "3.12.3"
++  }
++ },
++ "nbformat": 4,
++ "nbformat_minor": 2
++}
+diff --git a/prompt_optimization/predictors.py b/prompt_optimization/predictors.py
+index e1d2492..66eee9b 100644
+--- a/prompt_optimization/predictors.py
++++ b/prompt_optimization/predictors.py
+@@ -16,10 +16,33 @@ class GPT4Predictor(ABC):
+ class BinaryPredictor(GPT4Predictor):
+     categories = ['No', 'Yes']
+ 
++    def __init__(self, opt, model):
++        super().__init__(opt)
++        self.model = model
++
+     def inference(self, ex, prompt):
+         prompt = Template(prompt).render(text=ex['text'])
+         response = utils.chatgpt(
++            self.model,
+             prompt, max_tokens=4, n=1, timeout=2, 
+             temperature=self.opt['temperature'])[0]
+         pred = 1 if response.strip().upper().startswith('YES') else 0
+         return pred
++
++
++class CoTBinaryPredictor(GPT4Predictor):
++    categories = ['No', 'Yes']
++
++    def __init__(self, opt, model):
++        super().__init__(opt)
++        self.model = model
++
++    def inference(self, ex, prompt):
++        prompt = Template(prompt).render(text=ex['text'])
++        response = utils.chatgpt(
++            self.model,
++            prompt, n=1, timeout=2, 
++            temperature=self.opt['temperature'])[0]
++        final_answer = response.strip().split('\n')[-1].upper().strip()
++        pred = 'YES' in final_answer
++        return pred
+\ No newline at end of file
+diff --git a/prompt_optimization/prompts/ar_sarcasm.md b/prompt_optimization/prompts/ar_sarcasm.md
+deleted file mode 100644
+index e9baefc..0000000
+--- a/prompt_optimization/prompts/ar_sarcasm.md
++++ /dev/null
+@@ -1,9 +0,0 @@
+-# Task
+-Is this tweet sarcastic?
+-
+-# Output format
+-Answer Yes or No as labels
+-
+-# Prediction
+-Text: {{ text }}
+-Label:
+\ No newline at end of file
+diff --git a/prompt_optimization/prompts/ethos.md b/prompt_optimization/prompts/ethos.md
+deleted file mode 100644
+index fd1320d..0000000
+--- a/prompt_optimization/prompts/ethos.md
++++ /dev/null
+@@ -1,9 +0,0 @@
+-# Task
+-Is the following text hate speech?
+-
+-# Output format
+-Answer Yes or No as labels
+-
+-# Prediction
+-Text: {{ text }}
+-Label:
+\ No newline at end of file
+diff --git a/prompt_optimization/prompts/fallacy.md b/prompt_optimization/prompts/fallacy.md
+new file mode 100644
+index 0000000..a19223e
+--- /dev/null
++++ b/prompt_optimization/prompts/fallacy.md
+@@ -0,0 +1,12 @@
++# Task
++Is this text an instance of the logical fallacy of faulty generalization?
++
++# Examples
++{{ icl_examples }}
++
++# Output format
++Answer Yes or No as labels
++
++# Prediction
++Text: {{ text }}
++Label:
+\ No newline at end of file
+diff --git a/prompt_optimization/prompts/jailbreak.md b/prompt_optimization/prompts/jailbreak.md
+deleted file mode 100644
+index 3e7d9a5..0000000
+--- a/prompt_optimization/prompts/jailbreak.md
++++ /dev/null
+@@ -1,9 +0,0 @@
+-# Task
+-Detect if the message is a jailbreak attack, i.e. an attempt by a user to break through an AI system's protections
+-
+-# Output format
+-Answer Yes or No as labels
+-
+-# Prediction
+-Text: {{ text }}
+-Label:
+\ No newline at end of file
+diff --git a/prompt_optimization/prompts/liar.md b/prompt_optimization/prompts/liar.md
+index 22d7a7a..3fa2be2 100644
+--- a/prompt_optimization/prompts/liar.md
++++ b/prompt_optimization/prompts/liar.md
+@@ -1,6 +1,9 @@
+ # Task
+ Determine whether the Statement is a lie (Yes) or not (No) based on the Context and other information.
+ 
++# Examples
++{{ icl_examples }}
++
+ # Output format
+ Answer Yes or No as labels
+ 
+diff --git a/prompt_optimization/tasks.py b/prompt_optimization/tasks.py
+index 9fe330b..496868d 100644
+--- a/prompt_optimization/tasks.py
++++ b/prompt_optimization/tasks.py
+@@ -1,4 +1,5 @@
+ import requests
++import os
+ import json
+ import concurrent.futures
+ from abc import ABC, abstractmethod
+@@ -37,6 +38,36 @@ def process_example(ex, predictor, prompt):
+ 
+ 
+ class ClassificationTask(DataProcessor):
++    def compute_f1(self, labels, preds, average='minority'):
++        report_dict = classification_report(labels, preds, digits=4, output_dict=True)
++
++        report_labels = sorted(set(report_dict.keys()) - {'accuracy', 'macro avg', 'weighted avg', 'micro avg'})
++        minority_label = min([(report_dict[i]['support'], i) for i in report_labels])[-1]
++        majority_label = max([(report_dict[i]['support'], i) for i in report_labels])[-1]
++        label = minority_label
++        my_report_dict = {
++            'F1': report_dict['weighted avg']['f1-score'],
++            'Acc': report_dict['accuracy'],
++            'P': report_dict['weighted avg']['precision'],
++            'R': report_dict['weighted avg']['recall'],
++            'Majo_Acc': report_dict[majority_label]['support']
++                        / report_dict['weighted avg']['support'],
++            'TotalSamples': report_dict['weighted avg']['support'],
++            'Mino_Label': label,
++            'Mino_Samples': report_dict[label]['support'],
++            'Mino_F1': report_dict[label]['f1-score'],
++            'Mino_P': report_dict[label]['precision'],
++            'Mino_R': report_dict[label]['recall'],
++        }
++        print(my_report_dict)
++        my_simple_report_dict = {
++            'F1': round(report_dict[minority_label]['f1-score'] * 100, 2),
++            'P': round(report_dict[minority_label]['precision'] * 100, 2),
++            'R': round(report_dict[minority_label]['recall'] * 100, 2),
++            'Acc': round(report_dict['accuracy'] * 100, 2),
++        }
++        my_report_dict = my_simple_report_dict
++        return my_report_dict['F1']
+ 
+     def run_evaluate(self, predictor, prompt, test_exs, n=100):
+         labels = []
+@@ -50,8 +81,10 @@ class ClassificationTask(DataProcessor):
+                 labels.append(ex['label'])
+                 preds.append(pred)
+ 
++
+         accuracy = accuracy_score(labels, preds)
+-        f1 = f1_score(labels, preds, average='micro')
++        f1 = f1_score(labels, preds, average='binary')
++        #f1 = self.compute_f1(labels, preds)
+         return f1, texts, labels, preds
+ 
+     def evaluate(self, predictor, prompt, test_exs, n=100):
+@@ -121,9 +154,13 @@ class DefaultHFBinaryTask(BinaryClassificationTask):
+             exs.append({'id': f'train-{i}', 'label': row['label'], 'text': row['text']})
+         return exs
+     
+-    def get_test_examples(self):
++    def get_test_examples(self, full=False):
+         exs = []
+-        for i, row in enumerate(open(self.data_dir + '/test.jsonl')):
++        filename = self.data_dir + ('/full-test.jsonl' if full else '/test.jsonl')
++        if not os.path.exists(filename):
++            filename = self.data_dir + '/test.jsonl'
++        for i, row in enumerate(open(filename)):
+             row = json.loads(row.strip())
+             exs.append({'id': f'test-{i}', 'label': row['label'], 'text': row['text']})
+         return exs
++
+diff --git a/prompt_optimization/utils.py b/prompt_optimization/utils.py
+index bb3063f..7e45061 100644
+--- a/prompt_optimization/utils.py
++++ b/prompt_optimization/utils.py
+@@ -1,13 +1,29 @@
+-"""
+-https://oai.azure.com/portal/be5567c3dd4d49eb93f58914cccf3f02/deployment
+-clausa gpt4
+-"""
+-
+ import time
+ import requests
+ import config
+ import string
+ 
++from functools import lru_cache
++
++from openai import OpenAI, RateLimitError, APITimeoutError, APIStatusError
++import backoff
++
++@lru_cache
++def get_llm_client(model):
++    if model in config.LLM_ENDPOINTS:
++        client = OpenAI(
++            api_key=config.LLM_ENDPOINTS[model]["api_key"],
++            base_url=config.LLM_ENDPOINTS[model]["base_url"],
++        )
++        model_id = config.LLM_ENDPOINTS[model]["model"]
++        return client, model_id
++    else:
++        raise ValueError(f"Unknown model: {model}")
++
++
++def backoff_hdlr(details):
++    print("Backing off {wait:0.1f} seconds after {tries} tries".format(**details))
++
+ 
+ def parse_sectioned_prompt(s):
+ 
+@@ -28,71 +44,46 @@ def parse_sectioned_prompt(s):
+     return result
+ 
+ 
+-def chatgpt(prompt, temperature=0.7, n=1, top_p=1, stop=None, max_tokens=1024, 
++@backoff.on_exception(
++    backoff.expo,
++    (RateLimitError, APITimeoutError),
++    on_backoff=backoff_hdlr,
++    max_tries=10,
++    factor=70,
++)
++def __chatgpt_impl(model, kwargs):
++    client, model_id = get_llm_client(model)
++    try:
++        chat_completion = client.chat.completions.create(
++            model=model_id,
++            **kwargs,
++        )
++    except APIStatusError as e:
++        if '429' in str(e):
++            raise e
++        print(e)
++        # Censored by Azure. Return empty string.
++        return ""
++    output = chat_completion.choices[-1].message.content
++    output = output.removesuffix("<|eot_id|>")
++    return output
++
++
++def chatgpt(model, prompt, temperature=0.7, n=1, top_p=1, stop=None, max_tokens=1024, 
+                   presence_penalty=0, frequency_penalty=0, logit_bias={}, timeout=10):
+     messages = [{"role": "user", "content": prompt}]
+     payload = {
+         "messages": messages,
+-        "model": "gpt-3.5-turbo",
+         "temperature": temperature,
+         "n": n,
+         "top_p": top_p,
+         "stop": stop,
+-        "max_tokens": max_tokens,
+         "presence_penalty": presence_penalty,
+         "frequency_penalty": frequency_penalty,
+-        "logit_bias": logit_bias
+-    }
+-    retries = 0
+-    while True:
+-        try:
+-            r = requests.post('https://api.openai.com/v1/chat/completions',
+-                headers = {
+-                    "Authorization": f"Bearer {config.OPENAI_KEY}",
+-                    "Content-Type": "application/json"
+-                },
+-                json = payload,
+-                timeout=timeout
+-            )
+-            if r.status_code != 200:
+-                retries += 1
+-                time.sleep(1)
+-            else:
+-                break
+-        except requests.exceptions.ReadTimeout:
+-            time.sleep(1)
+-            retries += 1
+-    r = r.json()
+-    return [choice['message']['content'] for choice in r['choices']]
+-
+-
+-def instructGPT_logprobs(prompt, temperature=0.7):
+-    payload = {
+-        "prompt": prompt,
+-        "model": "text-davinci-003",
+-        "temperature": temperature,
+-        "max_tokens": 1,
+-        "logprobs": 1,
+-        "echo": True
++        "logit_bias": logit_bias,
++        "max_tokens": max_tokens,
+     }
+-    while True:
+-        try:
+-            r = requests.post('https://api.openai.com/v1/completions',
+-                headers = {
+-                    "Authorization": f"Bearer {config.OPENAI_KEY}",
+-                    "Content-Type": "application/json"
+-                },
+-                json = payload,
+-                timeout=10
+-            )  
+-            if r.status_code != 200:
+-                time.sleep(2)
+-                retries += 1
+-            else:
+-                break
+-        except requests.exceptions.ReadTimeout:
+-            time.sleep(5)
+-    r = r.json()
+-    return r['choices']
+-
++    if 'llama3' in model:
++        payload["extra_body"] = {'stop_token_ids': [128009, 128001]}
++    return [__chatgpt_impl(model, payload)]
+ 
+-- 
+2.39.3 (Apple Git-146)
+

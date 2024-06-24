@@ -1,0 +1,28 @@
+student_model_cfgs:
+  - model_type: azure_openai
+    model_cfg:
+      model: gpt-35-turbo-0613
+      api_version: 2024-02-15-preview
+    sample_cfg:
+      top_p: 0
+
+# can be overrided by per-model sample_cfg
+general_student_sample_cfg:
+  temperature: 0
+
+exam_maker_type: code_metainfo
+exam_maker_cfg:
+  num_exam_questions: 300
+
+exam_prompter_type: basic
+exam_prompter_cfg:
+  demo_template: "[[Question]]:\n\nHere is an example question, please understand it very carefully:\n\n{question}\n\nFirst, let''s think step by step to find a complete problem-solving strategy.\nThen, write a python code based on the problem-solving strategy.\n\n\n[[RATIONALE]]:\n\n{rationale}\n\n\n[[Final Code]]:\n\n${answer}$\n"
+  exam_template: "{demo}\n\n[[Question]]:\n\nPlease first understand the problem-solving approach in rationale of the aforementioned\nexample, and then follow the example to solve the following similar type of problem:\n\n{question}\n\nFirst, let''s think step by step to find a complete problem-solving strategy.\nThen, write a python code based on the problem-solving strategy.\n\n\n[[RATIONALE]]:\n"
+  debug_template: "[[Question]]:\n\n{question}\n\n[[RATIONALE]]:\n\n{rationale}\n\n[[Final Code]]:\n\n{answer}\n\nYou need to debug this code with the following rules:\n(1) If you think the provided code is correct, you must retrieve the original correct code.\n(2) If you think the provided code is incorrect, you debug the code and write the final bug-free code.\n(3) If there is no complete code, you must write a complete code based on the rationale.\n\nLet's think step by step and remember you **must** give me a complete python code finally.\n\n[ROLESWITCHING assistant:]\n"
+  use_multi_round_conv: false
+  
+exam_scorer_type: code
+
+teaching_plans: every
+
+debug: true
