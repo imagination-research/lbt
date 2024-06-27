@@ -28,7 +28,13 @@ dependencies = [
     "tomark",
     "Jinja2",
     "pyext",
-    "ninja"
+    "ninja",
+    "python-leetcode",
+    "pydantic",
+    "bs4",
+    "html2text",
+    "requests",
+    "python-dotenv"
 ]
 
 [project.optional-dependencies]
