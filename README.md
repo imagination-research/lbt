@@ -3,7 +3,12 @@
 **[[arXiv](https://arxiv.org/abs/2406.14629)]**
 **[[code](https://github.com/imagination-research/lbt)]**
 
-This is the code repository of our position paper "Can LLMs Learn by Teaching? A Preliminary Study". We make the first attempt in adapting the "learning by teach" strategy in education into LLMs and see if the contemporary LLMs are ready to learn by teach. The results are mixed but indeed show some promise. We also provide a roadmap for potential future research in Section 6 of our paper. If you find this repository or paper useful, you can cite
+This is the code repository of our position paper "Can LLMs Learn by Teaching? A Preliminary Study". 
+Our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. As one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
+
+We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). The results show some promise. Section 6 of our paper also provides a roadmap for future incorporation of education strategies into LLM learning.
+
+If you find this repository or paper useful, you can cite
 
 ```
 @misc{ning2024lbt,
