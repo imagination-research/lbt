@@ -1,7 +1,10 @@
 # Can LLMs Learn by Teaching? A Preliminary Study
 
+
+**[[NeurIPS 2024](#)]**
 **[[arXiv](https://arxiv.org/abs/2406.14629)]**
 **[[code](https://github.com/imagination-research/lbt)]**
+**[[blog](https://www.microsoft.com/en-us/research/blog/research-focus-week-of-august-26-2024/)]**
 
 This is the code repository of our position paper "Can LLMs Learn by Teaching? A Preliminary Study". 
 Our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. As one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
