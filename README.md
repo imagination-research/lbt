@@ -9,18 +9,19 @@
 This is the code repository of our position paper "Can LLMs Learn by Teaching? A Preliminary Study". 
 Our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. As one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
 
-We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). The results show some promise. Section 6 of our paper also provides a roadmap for future incorporation of education strategies into LLM learning.
+We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). The results show some promise. 
+
+We believe that this work merely scratches the surface of LbT's potential. As LLMs are exhibiting increasingly intelligence, education approaches beneficial for human learning may play a more crucial role in improving LLMs. To make this vision more concrete, we present a roadmap for incorporating education strategies into LLM learning in Section 6 of our paper. Besides, Appendix D in our paper discusses the detailed research rationale of our work: how we decide the high-level target, the LbT idea, the specific tasks, and the concrete LbT implementations.
 
 If you find this repository or paper useful, you can cite
 
 ```
-@misc{ning2024lbt,
+@inproceedings{ning2024lbt,
       title={Can LLMs Learn by Teaching? A Preliminary Study},
       author={Xuefei Ning and Zifu Wang and Shiyao Li and Zinan Lin and Peiran Yao and Tianyu Fu and Matthew B. Blaschko and Guohao Dai and Huazhong Yang and Yu Wang},
       year={2024},
-      eprint={2406.14629},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+      booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
+      url={https://openreview.net/forum?id=0ZZMUjZJYF}
 }
 ```
 
@@ -64,7 +65,7 @@ M1 incorporates the LbT idea into the search-based output generation pipeline. T
 * Step 3: The LbT score can be used as a quality assessment of the corresponding TR-TA pair. We consider two ways to select the final TA: (1) Selecting the TR-TA pair with the highest LbT score. We denote this approach as "M1 (MAX)". (2) Selecting the weighted-voted TA using the LbT score as the weight. We denote this approach as "M1 (SUM)".
 
 ### M1 Implementation
-Here, we briefly go through the M1 implementation. You can skip to [the next sections](#0-build-the-dataset-for-mathematical-reasoning) for the step-by-step commands for running experiments.
+Here, we briefly go through the M1 implementation. You can skip to [the next sections](#step-0-build-the-dataset-for-mathematical-reasoning) for the step-by-step commands for running experiments.
 
 The implementation orchestrates the running of several components, including the **exam maker** that decides the EPs given the TP-TR pair, the **exam prompter** that assembles the exam prompt, the **model** that takes the prompt and output the ERs and EAs, and the **exam scorer** that parses the model output and scores the ER and EA.
 
@@ -303,7 +304,7 @@ For usage instructions. Some of the arguments include:
 * `--init_method`: Initialization method for in-context examples. Options: `gen`, `train`.
 * `...`: Various other parameters related to optimization and evaluation.
 
-## Acknowledgement
+## Code Acknowledgement
 * We refer to [the Leetcode-Hard Gym codebase](https://github.com/GammaTauAI/leetcode-hard-gym) of [the Reflexion paper](https://arxiv.org/abs/2303.11366) to implement M1 for code synthesis,  and [the OpenCompass codebase](https://github.com/open-compass/opencompass) for the answer extraction for mathematical reasoning (NOTE: We change the implementation to improve the extraction accuracy). 
 * We use the [codebase](https://github.com/eric-mitchell/direct-preference-optimization) of the paper [Direct Preference Optimization: Your Language Model is Secretly a Reward Model](https://arxiv.org/abs/2305.18290) for M2 experiment.
 * We base the M3 implementation on the [codebase](https://github.com/microsoft/LMOps/tree/main/prompt_optimization) of the paper [Automatic Prompt Optimization with "Gradient Descent" and Beam Search](https://aclanthology.org/2023.emnlp-main.494/).
