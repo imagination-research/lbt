@@ -96,6 +96,10 @@ class MATHEvaluator:
         string = string.replace("tfrac", "frac")
         string = string.replace("dfrac", "frac")
 
+        # remove \( and \)
+        string = string.replace("\\(", "")
+        string = string.replace("\\)", "")
+
         # remove \left and \right
         string = string.replace("\\left", "")
         string = string.replace("\\right", "")
