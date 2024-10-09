@@ -1,15 +1,15 @@
-# Can LLMs Learn by Teaching? A Preliminary Study
+# Can LLMs Learn by Teaching for Better Reasoning? A Preliminary Study
 
 
-**[[NeurIPS 2024](#)]**
+**[[NeurIPS 2024](https://openreview.net/forum?id=0ZZMUjZJYF)]**
 **[[arXiv](https://arxiv.org/abs/2406.14629)]**
 **[[code](https://github.com/imagination-research/lbt)]**
 **[[blog](https://www.microsoft.com/en-us/research/blog/research-focus-week-of-august-26-2024/)]**
 
-This is the code repository of our position paper "Can LLMs Learn by Teaching? A Preliminary Study". 
-Our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. As one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
+This is the code repository of our paper "Can LLMs Learn by Teaching for Better Reasoning? A Preliminary Study". 
+Aiming at improving the reasoning ability of LLMs, our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. In addition to improving reasoning, as one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
 
-We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). The results show some promise. 
+We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). Our results suggest LbT's potential for harnessing the diversity offered by different students and facilitating weak-to-strong generalization in improving reasoning.
 
 We believe that this work merely scratches the surface of LbT's potential. As LLMs are exhibiting increasingly intelligence, education approaches beneficial for human learning may play a more crucial role in improving LLMs. To make this vision more concrete, we present a roadmap for incorporating education strategies into LLM learning in Section 6 of our paper. Besides, Appendix D in our paper discusses the detailed research rationale of our work: how we decide the high-level target, the LbT idea, the specific tasks, and the concrete LbT implementations.
 
