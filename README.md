@@ -3,8 +3,10 @@
 
 **[[NeurIPS 2024](https://openreview.net/forum?id=0ZZMUjZJYF)]**
 **[[arXiv](https://arxiv.org/abs/2406.14629)]**
+**[[website](https://sites.google.com/view/llm-learning-by-teaching)]**
 **[[code](https://github.com/imagination-research/lbt)]**
 **[[blog](https://www.microsoft.com/en-us/research/blog/research-focus-week-of-august-26-2024/)]**
+
 
 This is the code repository of our paper "Can LLMs Learn by Teaching for Better Reasoning? A Preliminary Study". 
 Aiming at improving the reasoning ability of LLMs, our paper explores whether or not the current LLMs can "learn by teach (LbT)", which is a well-recognized paradigm in human learning. In addition to improving reasoning, as one can imagine, the ability of LbT could offer exciting opportunities for the models to continuously evolve by teaching other (potentially weaker) models, rather than solely relying on human-produced data or stronger teachers.
@@ -17,7 +19,7 @@ If you find this repository or paper useful, you can cite
 
 ```
 @inproceedings{ning2024lbt,
-      title={Can LLMs Learn by Teaching? A Preliminary Study},
+      title={Can LLMs Learn by Teaching for Better Reasoning? A Preliminary Study},
       author={Xuefei Ning and Zifu Wang and Shiyao Li and Zinan Lin and Peiran Yao and Tianyu Fu and Matthew B. Blaschko and Guohao Dai and Huazhong Yang and Yu Wang},
       year={2024},
       booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
@@ -37,7 +39,7 @@ The repository is organized as follows.
 - [Method 1 (M1)](#method-1-m1)
 - [Method 2 (M2)](#method-2-m2)
 - [Method 3 (M3)](#method-3-m3)
-- [Acknowledgement](#acknowledgement)
+- [Acknowledgement](#code-acknowledgement)
 
 
 ## Install
