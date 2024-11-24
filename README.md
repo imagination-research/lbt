@@ -4,7 +4,7 @@
 **[[NeurIPS 2024](https://openreview.net/forum?id=0ZZMUjZJYF)]**
 **[[arXiv](https://arxiv.org/abs/2406.14629)]**
 **[[website](https://sites.google.com/view/llm-learning-by-teaching)]**
-**[[code](https://github.com/imagination-research/lbt)]**
+**[[video](https://www.bilibili.com/video/BV1f6UoYQEqw/)]**
 **[[blog](https://www.microsoft.com/en-us/research/blog/research-focus-week-of-august-26-2024/)]**
 
 
@@ -13,7 +13,11 @@ Aiming at improving the reasoning ability of LLMs, our paper explores whether or
 
 We execute the exploration by implementing the LbT idea into well-established pipelines to see if it can improve the reasoning outcomes and ability on several complex tasks (e.g., mathematical reasoning, competition-level code synthesis). Our results suggest LbT's potential for harnessing the diversity offered by different students and facilitating weak-to-strong generalization in improving reasoning.
 
-We believe that this work merely scratches the surface of LbT's potential. As LLMs are exhibiting increasingly intelligence, education approaches beneficial for human learning may play a more crucial role in improving LLMs. To make this vision more concrete, we present a roadmap for incorporating education strategies into LLM learning in Section 6 of our paper. Besides, Appendix D in our paper discusses the detailed research rationale of our work: how we decide the high-level target, the LbT idea, the specific tasks, and the concrete LbT implementations.
+We believe that this work merely scratches the surface of LbT's potential. As LLMs are exhibiting increasingly intelligence, education approaches beneficial for human learning may play a more crucial role in improving LLMs. To make this vision more concrete, we present a roadmap for incorporating education strategies into LLM learning in Section 6 of our paper. Besides, **Appendix D in our paper discusses the detailed research rationale of our work: how we decide the high-level target, the LbT idea, the specific tasks, and the concrete LbT implementations**.
+
+Here is the summary poster of our work:
+![LbT Poster](./LbT_poster.png)
+
 
 If you find this repository or paper useful, you can cite
 
@@ -26,6 +30,7 @@ If you find this repository or paper useful, you can cite
       url={https://openreview.net/forum?id=0ZZMUjZJYF}
 }
 ```
+
 
 The repository is organized as follows.
 * The core implementation is under [`lbt/`](lbt/).
